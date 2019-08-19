@@ -15,6 +15,16 @@ server.use((req, res, next) => {
   next();
 });
 
+const projectIdInUse = (req, res, next) => {
+  const { id } = req.body;
+  const index = projects.findIndex(project => project.id == id);
+  if (projects[index]) {
+    return res.status(400).json({ error: "Project id in use" });
+  }
+
+  return next();
+};
+
 const projectIdIsValid = (req, res, next) => {
   const { id } = req.params;
   const index = projects.findIndex(project => project.id === id);
@@ -24,10 +34,11 @@ const projectIdIsValid = (req, res, next) => {
   return next();
 };
 
-server.post("/projects", (req, res) => {
+server.post("/projects", projectIdInUse, (req, res) => {
   const { id, title } = req.body;
   const project = { id: String(id), title: String(title), tasks: [] };
   projects.push(project);
+
   return res.json(project);
 });
 
